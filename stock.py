@@ -39,7 +39,7 @@ class Stock:
                 return rf"{stock_dict['股票代碼']}目前股價漲幅為{stock_dict['漲跌幅']}%"
     
     def send_notify(self,message):
-        with open('token.yaml', 'r') as file:
+        with open('./data/imformation.yaml', 'r') as file:
             data = yaml.load(file, Loader=yaml.FullLoader)
         url = 'https://notify-api.line.me/api/notify'
         token = data['token']
