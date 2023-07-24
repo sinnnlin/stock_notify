@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
+import pandas as pd
 import re
 import time
 from datetime import datetime
@@ -34,9 +34,12 @@ class Stock:
     
     def check_stock_price_change(self,stock_dict):
         thresholds = [5,6,7,8,9,10]
-        for threshold in range(len(thresholds)-1,0,-1):
-            # print(thresholds[threshold])
-            if 5<=stock_dict['漲跌幅']<=thresholds[threshold]:
+        # for threshold in range(len(thresholds)-1,0,-1):
+        #     # print(thresholds[threshold])
+        #     if 5<=stock_dict['漲跌幅']<=thresholds[threshold]:
+        #         return rf"{stock_dict['股票代碼']}目前股價漲幅為{stock_dict['漲跌幅']}%"
+        for threshold in thresholds:
+            if stock_dict['漲跌幅']>=threshold:
                 return rf"{stock_dict['股票代碼']}目前股價漲幅為{stock_dict['漲跌幅']}%"
     
     def send_notify(self,message):
@@ -52,24 +55,29 @@ class Stock:
         }
         data = requests.post(url, headers=headers, data=data)   # 使用 POST 方法
     
-    def main (self):
+    def main (self,history):
         
         stock_dict = self.stock_price()
         message = self.check_stock_price_change(stock_dict)
-        self.send_notify(message)
+        if stock_dict['漲跌幅']!=history.get(i):
+            self.send_notify(message)
+        # else:
+            # self.send_notify('the same')
+        return stock_dict
         
         
 
 if __name__ == '__main__':
-    
-    
     stop_time = datetime.now().replace(hour=13, minute=30, second=0, microsecond=0) 
     stock_num = input('請輸入股票代碼：').split()
+    history = dict()
     while datetime.now() < stop_time:
         for i in stock_num:
             print(i)
-            test = Stock(i)
-            test.main() 
+            model = Stock(i)
+            stock_dict = model.main(history)
+            history[i] = stock_dict['漲跌幅']
+        print('等待五分鐘',datetime.now())
         time.sleep(300)  # 300 秒等於五分鐘
   
 
