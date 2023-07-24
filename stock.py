@@ -1,8 +1,8 @@
 import requests
-import pandas as pd
 import re
 import time
 from datetime import datetime
+import yaml
 
 class Stock:
     def __init__(self,stock_num):
@@ -34,29 +34,24 @@ class Stock:
     
     def check_stock_price_change(self,stock_dict):
         thresholds = [5,6,7,8,9,10]
-        # for threshold in range(len(thresholds)-1,0,-1):
-        #     # print(thresholds[threshold])
-        #     if 5<=stock_dict['漲跌幅']<=thresholds[threshold]:
-        #         return rf"{stock_dict['股票代碼']}目前股價漲幅為{stock_dict['漲跌幅']}%"
         for threshold in thresholds:
             if stock_dict['漲跌幅']>=threshold:
                 return rf"{stock_dict['股票代碼']}目前股價漲幅為{stock_dict['漲跌幅']}%"
     
     def send_notify(self,message):
+        with open('token.yaml', 'r') as file:
+            data = yaml.load(file, Loader=yaml.FullLoader)
         url = 'https://notify-api.line.me/api/notify'
-        token = 'cYGf4HZecMzcV6GwuugeHF3TUQ5xyOj5bYOzTUuUjRB'
+        token = data['token']
         headers = {
             'Authorization': 'Bearer ' + token    # 設定權杖
         }
-        # stock_send = requests.post(url, headers=headers)   # 
-        # print(stock_num.json())
         data = {
             'message':message     # 設定要發送的訊息
         }
         data = requests.post(url, headers=headers, data=data)   # 使用 POST 方法
     
     def main (self,history):
-        
         stock_dict = self.stock_price()
         message = self.check_stock_price_change(stock_dict)
         if stock_dict['漲跌幅']!=history.get(i):
